@@ -21,7 +21,7 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
   final Set<Polyline> _polylines = {};
   final Set<Marker> _markers = {};
 
-  // ট্র্যাকিং শুরু
+  // Tracking Start
   Future<void> _toggleTracking() async {
     if (_isTracking) {
       _locationSubscriber?.cancel();
@@ -43,25 +43,25 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
     }
   }
 
-  // ম্যাপ আপডেট লজিক
+  // map update
   void _updateMap(Position position) async {
     LatLng currentLatLng = LatLng(position.latitude, position.longitude);
 
     setState(() {
       _pathPoints.add(currentLatLng);
 
-      // পলিলাইন ড্র করা
+
       _polylines.add(
         Polyline(
           polylineId: const PolylineId('live_track'),
           points: _pathPoints,
           color: Colors.blueAccent,
-          width: 6,
+          width: 4,
           jointType: JointType.round,
         ),
       );
 
-      // মার্কার আপডেট (বর্তমান পজিশন)
+      // marker update
       _markers.add(
         Marker(
           markerId: const MarkerId('me'),
@@ -72,7 +72,7 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
       );
     });
 
-    // ক্যামেরা অটোমেটিক ইউজারের সাথে মুভ করবে
+    // Camera Moving
     final GoogleMapController controller = await _mapController.future;
     controller.animateCamera(
       CameraUpdate.newCameraPosition(
@@ -84,12 +84,12 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Live Polyline Tracking')),
+      appBar: AppBar(title: const Text('Live Tracking')),
       body: Stack(
         children: [
           GoogleMap(
             initialCameraPosition: const CameraPosition(
-              target: LatLng(24.253724327647177, 89.92152362727028),
+              target: LatLng(24.25150934913589, 89.91469759488764),
               zoom: 16,
             ),
             markers: _markers,
@@ -99,11 +99,11 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
             onMapCreated: (controller) => _mapController.complete(controller),
           ),
 
-          // কন্ট্রোল বাটন
+
           Positioned(
-            bottom: 30,
-            left: 20,
-            right: 20,
+            bottom: 60,
+            left: 50,
+            right: 50,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 15),
@@ -112,7 +112,7 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
               ),
               onPressed: _toggleTracking,
               icon: Icon(_isTracking ? Icons.stop : Icons.play_arrow),
-              label: Text(_isTracking ? "Stop Recording Path" : "Start Tracking Path"),
+              label: Text(_isTracking ? "Stop" : "Start"),
             ),
           ),
         ],

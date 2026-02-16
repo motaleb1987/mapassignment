@@ -3,13 +3,13 @@ import 'package:geolocator/geolocator.dart';
 
 class LocationService {
 
-  // পারমিশন চেক করার হেল্পার
+  // Location permission check
   bool _isPermissionEnable(LocationPermission locationPermission) {
     return locationPermission == LocationPermission.whileInUse ||
         locationPermission == LocationPermission.always;
   }
 
-  // পারমিশন এবং GPS হ্যান্ডেল করা
+  // Gps permission handle
   Future<bool> handleLocationPermission({VoidCallback? onSuccess}) async {
     final LocationPermission locationPermission = await Geolocator.checkPermission();
 
@@ -30,12 +30,12 @@ class LocationService {
     return false;
   }
 
-  // রিয়েল টাইম লোকেশন স্ট্রিম পাওয়ার মেথড
+  // get real time location
   Stream<Position> getRealTimeLocationStream() {
     return Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.bestForNavigation,
-        distanceFilter: 3, // প্রতি ৩ মিটার মুভমেন্টে ডাটা দিবে
+        distanceFilter: 3,
       ),
     );
   }
