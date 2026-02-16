@@ -17,11 +17,38 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
   StreamSubscription? _locationSubscriber;
 
   bool _isTracking = false;
+  LatLng? _initialPosition;
   final List<LatLng> _pathPoints = [];
   final Set<Polyline> _polylines = {};
   final Set<Marker> _markers = {};
 
-  // Tracking Start
+  @override
+  void initState() {
+    super.initState();
+    _setInitialLocation();
+  }
+
+  // Current location find
+  Future<void> _setInitialLocation() async {
+    bool hasPermission = await _locationService.handleLocationPermission();
+    if (hasPermission) {
+      Position? position = await _locationService.getCurrentLocation();
+      if (position != null) {
+        setState(() {
+          _initialPosition = LatLng(position.latitude, position.longitude);
+        });
+
+        // Camera position changed
+        final GoogleMapController controller = await _mapController.future;
+        controller.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: _initialPosition!, zoom: 16),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _toggleTracking() async {
     if (_isTracking) {
       _locationSubscriber?.cancel();
@@ -43,36 +70,31 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
     }
   }
 
-  // map update
   void _updateMap(Position position) async {
     LatLng currentLatLng = LatLng(position.latitude, position.longitude);
 
     setState(() {
       _pathPoints.add(currentLatLng);
-
-
       _polylines.add(
         Polyline(
           polylineId: const PolylineId('live_track'),
           points: _pathPoints,
           color: Colors.blueAccent,
-          width: 4,
+          width: 5,
           jointType: JointType.round,
         ),
       );
 
-      // marker update
       _markers.add(
         Marker(
           markerId: const MarkerId('me'),
           position: currentLatLng,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-          infoWindow: const InfoWindow(title: "You are here"),
+          infoWindow: const InfoWindow(title: "I am here"),
         ),
       );
     });
 
-    // Camera Moving
     final GoogleMapController controller = await _mapController.future;
     controller.animateCamera(
       CameraUpdate.newCameraPosition(
@@ -85,11 +107,13 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Live Tracking')),
-      body: Stack(
+      body: _initialPosition == null
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: const CameraPosition(
-              target: LatLng(24.25150934913589, 89.91469759488764),
+            initialCameraPosition: CameraPosition(
+              target: _initialPosition!,
               zoom: 16,
             ),
             markers: _markers,
@@ -98,8 +122,6 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
             myLocationButtonEnabled: true,
             onMapCreated: (controller) => _mapController.complete(controller),
           ),
-
-
           Positioned(
             bottom: 60,
             left: 50,
