@@ -63,9 +63,11 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
           _markers.clear();
         });
 
-        _locationSubscriber = _locationService.getRealTimeLocationStream().listen((Position position) {
-          _updateMap(position);
-        });
+        _locationSubscriber = _locationService
+            .getRealTimeLocationStream()
+            .listen((Position position) {
+              _updateMap(position);
+            });
       }
     }
   }
@@ -89,7 +91,9 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
         Marker(
           markerId: const MarkerId('me'),
           position: currentLatLng,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
           infoWindow: const InfoWindow(title: "I am here"),
         ),
       );
@@ -106,39 +110,46 @@ class _MyLocationScreenState extends State<MyLocationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Live Tracking')),
+      appBar: AppBar(
+        backgroundColor: Colors.teal,
+        title: const Text(
+          'Real-Time Location Tracker',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: _initialPosition == null
           ? const Center(child: CircularProgressIndicator())
           : Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: _initialPosition!,
-              zoom: 16,
+              children: [
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: _initialPosition!,
+                    zoom: 16,
+                  ),
+                  markers: _markers,
+                  polylines: _polylines,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                  onMapCreated: (controller) =>
+                      _mapController.complete(controller),
+                ),
+                Positioned(
+                  bottom: 60,
+                  left: 50,
+                  right: 50,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      backgroundColor: _isTracking ? Colors.red : Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: _toggleTracking,
+                    icon: Icon(_isTracking ? Icons.stop : Icons.play_arrow),
+                    label: Text(_isTracking ? "Stop" : "Start"),
+                  ),
+                ),
+              ],
             ),
-            markers: _markers,
-            polylines: _polylines,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            onMapCreated: (controller) => _mapController.complete(controller),
-          ),
-          Positioned(
-            bottom: 60,
-            left: 50,
-            right: 50,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                backgroundColor: _isTracking ? Colors.red : Colors.green,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: _toggleTracking,
-              icon: Icon(_isTracking ? Icons.stop : Icons.play_arrow),
-              label: Text(_isTracking ? "Stop" : "Start"),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
