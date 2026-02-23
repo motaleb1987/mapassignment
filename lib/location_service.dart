@@ -30,6 +30,18 @@ class LocationService {
     return false;
   }
 
+  // Current location
+  Future<Position?> getCurrentLocation() async {
+    final bool isSuccess = await handleLocationPermission();
+    if (isSuccess) {
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+    }
+    return null;
+  }
+
+
   // get real time location
   Stream<Position> getRealTimeLocationStream() {
     return Geolocator.getPositionStream(
